@@ -1,0 +1,27 @@
+﻿.ui-panel {
+    position: relative;
+}
+
+.ui-panel-header {
+    height: 32px;
+    padding: 4px;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.ui-panel-header .ui-icon {
+    float: right;
+    margin: 2px;
+}
+
+.ui-panel-content {
+    position: absolute;
+    top: 31px;
+    bottom: 0;
+    width: 100%;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    overflow: auto;
+}
