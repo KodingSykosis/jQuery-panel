@@ -3,3 +3,8 @@ C:\Users\godwh_000\Source\jQuery-Panel\bin\jQuery-Panel.pdb
 C:\Users\godwh_000\Source\jQuery-Panel\obj\Debug\jQuery-Panel.csprojResolveAssemblyReference.cache
 C:\Users\godwh_000\Source\jQuery-Panel\obj\Debug\jQuery-Panel.dll
 C:\Users\godwh_000\Source\jQuery-Panel\obj\Debug\jQuery-Panel.pdb
+C:\Users\godwh_000\GitHub\jQuery-panel\bin\jQuery-Panel.dll
+C:\Users\godwh_000\GitHub\jQuery-panel\bin\jQuery-Panel.pdb
+C:\Users\godwh_000\GitHub\jQuery-panel\obj\Debug\jQuery-Panel.csprojResolveAssemblyReference.cache
+C:\Users\godwh_000\GitHub\jQuery-panel\obj\Debug\jQuery-Panel.dll
+C:\Users\godwh_000\GitHub\jQuery-panel\obj\Debug\jQuery-Panel.pdb

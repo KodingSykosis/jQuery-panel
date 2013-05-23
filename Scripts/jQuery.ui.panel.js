@@ -38,23 +38,21 @@
 
                 this.panel =
                     this.content.parent();
+
+                if (!this.panel.is(this.element)) {
+                    this.panel
+                        .on({
+                            resize: $.proxy(this._onResize, this),
+                            drag: $.proxy(this._onDrag, this)
+                        });
+                }
+                
             }
 
             if (this.header.length == 0 && showHeader !== false) {
-                this.header = $('<div>', {
-                    'class': 'ui-panel-header ui-accordin-header',
-                    'html': this.options['title'] || 'Untitled'
-                });
-
-                this.panel
-                    .prepend(this.header);
+                this._createHeader();
             }
-
-
-            if (this.options['url']) {
-                this.load(this.options['url']);
-            }
-
+             
             if (this.options['collapsed']) {
                 this.content
                     .hide();
@@ -67,8 +65,14 @@
                 .addClass('ui-panel-content ui-widget-content ui-corner-bottom');
 
             if (this.options['draggable']) {
+                if (typeof this.options['draggable'] == 'boolean') {
+                    this.options['draggable'] = {};
+                }
+
                 this.panel
-                    .draggable(this.options['draggable']);
+                    .draggable($.extend({
+                        handle: this.header
+                    }, this.options['draggable']));
             }
 
             if (this.options['resizable']) {
@@ -96,7 +100,7 @@
                     );
             }
 
-            if (this.options['refreshable']) {
+            if (this.options['refreshable'] && this.options['url']) {
                 this.header
                     .append(
                         $('<span>', {
@@ -105,15 +109,73 @@
                         })
                     );
             }
+            
+            if (this.options['layout'] && this.content.layout) {
+                this.content
+                    .layout(this.options['layout']);
+            }
+            
+
+            if (this.options['url']) {
+                this.load(this.options['url']);
+            }
         },
 
         load: function (url) {
+            var el = this.element,
+                self = this;
+
             this.content
-                .load(url);
+                .load(url, function () {
+                    el.trigger('refresh');
+                    self._autoRefresh();
+                });
+        },
+        
+        title: function(value) {
+            if (typeof value != 'undefined') {
+                this.options['title'] = value;
+
+                if (this.header) {
+                    this.header
+                        .children('.ui-panel-title')
+                        .html(value);
+                } else {
+                    this._createHeader();
+                }
+            }
+
+            return this.header
+                .children('.ui-panel-title')
+                .text();
+        },
+        
+        _createHeader: function() {
+            this.header = $('<div>', {
+                'class': 'ui-panel-header ui-accordin-header',
+                'append': $('<span>', {
+                    'class': 'ui-panel-title',
+                    'html': this.options['title'] || 'Untitled'
+                })
+            });
+
+            this.panel
+                .prepend(this.header);
+        },
+        
+        _autoRefresh: function() {
+            if (this.options['url'] && typeof this.options['refreshInterval'] === 'number') {
+                setTimeout(
+                    $.proxy(this._onRefreshClicked, this),
+                    this.options['refreshInterval']);
+            }
         },
 
         _onCloseClicked: function () {
+            this._trigger('closing');
 
+            this.panel
+                .remove();
         },
 
         _onCollapseClicked: function (event) {
@@ -121,8 +183,6 @@
             var icon = $(event.delegateTarget || event.target);
             var header = this.header;
             var panel = this.panel;
-            var resizable = this.options['resizable'];
-            var content = this.content;
 
             icon.toggleClass('ui-icon-minus', !collapse);
             icon.toggleClass('ui-icon-extlink', collapse);
@@ -140,26 +200,55 @@
                     step: function (now, tween) {
                         panel.height(now + header.outerHeight());
                     },
-                    complete: function () {
-                        header.toggleClass('ui-corner-all', collapse);
-                        if (!resizable) return;
-                        
-                        if (collapse) {
-                            panel.resizable('destroy');
-                            content.hide();
-                        } else {
-                            panel.resizable(resizable);
-                            content.css({
-                                height: 'auto',
-                                bottom: '0'
-                            });
-                        }
-                    }
+                    complete: $.proxy(this._animateComplete, this)
                  });
+        },
+        
+        _animateComplete: function () {
+            var resizable = this.options['resizable'];
+            var collapse = parseInt(this.content.height()) == 0;
+            
+            this.header
+                .toggleClass('ui-corner-all', collapse);
+            
+            if (!resizable) return;
+
+            if (collapse) {
+                this.panel
+                    .resizable('destroy');
+                
+                this.content
+                    .hide();
+
+                this.element
+                    .trigger('collapsed');
+            } else {
+                this.panel
+                    .resizable(resizable);
+
+                this.content
+                    .css({
+                        height: 'auto',
+                        bottom: '0'
+                    });
+
+                this.element
+                    .trigger('expanded');
+            }
         },
 
         _onRefreshClicked: function () {
-
+            this.load(this.options['url']);
+        },
+        
+        _onResize: function (event, ui) {
+            this.element
+                .triggerHandler('resize', ui);
+        },
+        
+        _onDrag: function(event, ui) {
+            this.element
+                .triggerHandler('drag', ui);
         }
     });
 })(jQuery);
