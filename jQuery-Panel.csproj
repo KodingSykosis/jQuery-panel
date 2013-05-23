@@ -60,6 +60,7 @@
     <Content Include="css\Example.css" />
     <Content Include="css\jQuery.ui.panel.css" />
     <Content Include="index.html" />
+    <Content Include="LazyContent.txt" />
     <Content Include="Scripts\Example.js" />
     <Content Include="Scripts\jQuery.ui.panel.js" />
     <Content Include="Web.config" />
