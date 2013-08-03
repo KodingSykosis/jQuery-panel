@@ -1,5 +1,6 @@
 ﻿.ui-panel {
     position: relative;
+    overflow: hidden;
 }
 
 .ui-panel-header {
@@ -10,10 +11,10 @@
     box-sizing: border-box;
 }
 
-.ui-panel-header .ui-icon {
-    float: right;
-    margin: 2px;
-}
+    .ui-panel-header .ui-icon {
+        float: right;
+        margin: 2px;
+    }
 
 .ui-panel-content {
     position: absolute;
@@ -24,4 +25,46 @@
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
     overflow: auto;
+    padding: 10px;
+}
+
+.ui-panel-tab {
+    position: absolute;
+}
+
+.ui-panel-tab .ui-panel-header {
+    cursor: pointer;
+}
+
+.ui-panel-tab .ui-panel-content {
+    display: none;
+}
+
+.ui-panel-tab .ui-state-active ~ .ui-panel-content {
+    display: block;
+}
+
+.ui-panel-tab-bottom .ui-panel-content {
+    top: 0;
+    bottom: 31px;
+    z-index: 1;
+}
+
+.ui-panel-tab-bottom .ui-panel-header {
+    position: absolute;
+    bottom: 0;
+    z-index: 2;
+}
+
+.ui-panel-tab-bottom .ui-panel-title {
+    margin: 0.15em 0.25em;
+}
+
+.ui-not-selectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: moz-none;
+    -ms-user-select: none;
+    user-select: none;
 }
