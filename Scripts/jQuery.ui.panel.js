@@ -8,7 +8,9 @@
             refreshable: true,
             url: undefined,
             draggable: undefined,
-            resizable: undefined
+            resizable: undefined,
+            height: 400,
+            width: 300
         },
 
         _create: function () {
@@ -57,6 +59,14 @@
                 this.content
                     .hide();
             }
+
+            this.panel
+                .css({
+                    height: this.options
+                                .height,
+                    width: this.options
+                               .width
+                });
 
             this.header
                 .addClass('ui-widget-header ui-corner-top');
