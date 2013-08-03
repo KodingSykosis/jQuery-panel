@@ -1,11 +1,13 @@
 ﻿(function ($) {
     $.widget('kodingsykosis.panel', {
         options: {
-            title: 'Untitled',
+            title: undefined,
             collapsable: true,
             collapsed: false,
             closable: false,
             refreshable: true,
+            tabPanel: false,
+            tabPosition: 'bottom',
             url: undefined,
             draggable: undefined,
             resizable: undefined,
@@ -13,12 +15,13 @@
             width: 300
         },
 
-        _create: function () {
+        _create: function() {
             var showHeader =
                 this.options['title'] ||
                     this.options['collapsable'] ||
                     this.options['closable'] ||
-                    this.options['refreshable'];
+                    this.options['refreshable'] ||
+                    this.element.attr('title');
 
             $.extend(this, {
                 header: $('.ui-panel-header', this.element),
@@ -41,20 +44,18 @@
                 this.panel =
                     this.content.parent();
 
-                if (!this.panel.is(this.element)) {
-                    this.panel
-                        .on({
-                            resize: $.proxy(this._onResize, this),
-                            drag: $.proxy(this._onDrag, this)
-                        });
-                }
-                
+                this.panel
+                    .on({
+                        resize: $.proxy(this._onResize, this),
+                        drag: $.proxy(this._onDrag, this)
+                    })
+                    .data($.camelCase(this.widgetFullName), this);
             }
 
             if (this.header.length == 0 && showHeader !== false) {
                 this._createHeader();
             }
-             
+
             if (this.options['collapsed']) {
                 this.content
                     .hide();
@@ -63,16 +64,18 @@
             this.panel
                 .css({
                     height: this.options
-                                .height,
+                        .height,
                     width: this.options
-                               .width
+                        .width
                 });
 
             this.header
-                .addClass('ui-widget-header ui-corner-top');
+                .addClass('ui-widget-header ui-not-selectable')
+                .toggleClass('ui-corner-top', !this.options['tabPanel']);
 
             this.content
-                .addClass('ui-panel-content ui-widget-content ui-corner-bottom');
+                .addClass('ui-panel-content ui-widget-content')
+                .toggleClass('ui-corner-bottom', !this.options['tabPanel']);
 
             if (this.options['draggable']) {
                 if (typeof this.options['draggable'] == 'boolean') {
@@ -119,29 +122,32 @@
                         })
                     );
             }
-            
+
             if (this.options['layout'] && this.content.layout) {
                 this.content
                     .layout(this.options['layout']);
             }
-            
+
+            if (this.options['tabPanel']) {
+                this._createTab();
+            }
 
             if (this.options['url']) {
                 this.load(this.options['url']);
             }
         },
 
-        load: function (url) {
+        load: function(url) {
             var el = this.element,
                 self = this;
 
             this.content
-                .load(url, function () {
+                .load(url, function() {
                     el.trigger('refresh');
                     self._autoRefresh();
                 });
         },
-        
+
         title: function(value) {
             if (typeof value != 'undefined') {
                 this.options['title'] = value;
@@ -159,20 +165,57 @@
                 .children('.ui-panel-title')
                 .text();
         },
-        
+
+        close: function (evt) {
+            if (!evt) evt = $.Event('closing');
+            evt.index = this.panel.index();
+            if (!this._trigger('closing', evt)) return;
+
+            this.panel
+                .remove();
+
+            this._trigger('close', evt);
+        },
+
         _createHeader: function() {
             this.header = $('<div>', {
                 'class': 'ui-panel-header ui-accordin-header',
                 'append': $('<span>', {
                     'class': 'ui-panel-title',
-                    'html': this.options['title'] || 'Untitled'
+                    'html': this.options['title'] || this.element.attr('title') || 'Untitled'
                 })
             });
+
+            this.content
+                .removeAttr('title');
 
             this.panel
                 .prepend(this.header);
         },
-        
+
+        _createTab: function() {
+            var tabPosition =
+                this.options
+                    .tabPosition;
+
+            this.panel
+                .addClass('ui-panel-tab');
+
+            this.header
+                .addClass('ui-state-default')
+                .toggle(tabPosition !== 'left' && tabPosition !== 'right');
+
+            if (this.header.is(':visible')) {
+                this.panel
+                    .toggleClass('ui-panel-tab-bottom', tabPosition === 'bottom');
+            }
+
+            this.header
+                .click($.proxy(this._onTitleClicked, this))
+                .hover(function() { $(this).addClass('ui-state-hover'); },
+                    function() { $(this).removeClass('ui-state-hover'); });
+        },
+
         _autoRefresh: function() {
             if (this.options['url'] && typeof this.options['refreshInterval'] === 'number') {
                 setTimeout(
@@ -181,11 +224,13 @@
             }
         },
 
-        _onCloseClicked: function () {
-            this._trigger('closing');
+        _onTitleClicked: function (evt) {
+            evt.index = this.panel.index();
+            this._trigger('active', evt);
+        },
 
-            this.panel
-                .remove();
+        _onCloseClicked: function (evt) {
+            this.close(evt);
         },
 
         _onCollapseClicked: function (event) {
